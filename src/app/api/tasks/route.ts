@@ -1,26 +1,31 @@
 import { NextResponse } from 'next/server';
-// Adjust the import path to match your actual Task model location
 import Task from '../../../models/Task';
 import dbConnect from '../../../lib/dbConnect';
+import { validateRequest } from '../../middleware/validation';
 
 export async function POST(request: Request) {
+  // Validate input
+  const validation = validateRequest([
+    { param: 'title', type: 'body', required: true },
+    { param: 'description', type: 'body', required: false },
+    { param: 'priority', type: 'body', required: false, enum: ['low', 'medium', 'high'] }
+  ]);
+
+  const validationResult = await validation(request);
+  if (validationResult) {
+    return validationResult;
+  }
+
   try {
     await dbConnect();
     const body = await request.json();
     const { title, description, dueDate, priority } = body;
     
-    if (!title) {
-      return NextResponse.json(
-        { error: 'Title is required' },
-        { status: 400 }
-      );
-    }
-    
     const task = await Task.create({
-      title,
-      description,
+      title: title.trim(),
+      description: description?.trim(),
       dueDate,
-      priority
+      priority: priority || 'medium'
     });
     
     return NextResponse.json(task, { status: 201 });
@@ -34,6 +39,17 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
+  // Validate query parameters
+  const validation = validateRequest([
+    { param: 'limit', type: 'query', required: false, min: 1 },
+    { param: 'offset', type: 'query', required: false, min: 0 }
+  ]);
+
+  const validationResult = await validation(request);
+  if (validationResult) {
+    return validationResult;
+  }
+
   try {
     await dbConnect();
     const { searchParams } = new URL(request.url);
