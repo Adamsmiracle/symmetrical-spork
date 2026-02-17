@@ -1,14 +1,6 @@
-const Task = require('../models/Task');
-
+// Simple database connection function for JSON storage
 module.exports = async function dbConnect() {
-  try {
-    // Use the sequelize instance attached to the model
-    const sequelize = Task.sequelize;
-    await sequelize.authenticate();
-    await sequelize.sync();
-    return sequelize;
-  } catch (err) {
-    console.error('dbConnect error:', err);
-    throw err;
-  }
+  // No connection needed for JSON file storage
+  // This function exists for compatibility with existing code
+  return Promise.resolve();
 };

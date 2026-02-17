@@ -40,10 +40,9 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
     
-    const tasks = await Task.findAndCountAll({
+    const tasks = await Task.findAll({
       limit,
-      offset,
-      order: [['createdAt', 'DESC']]
+      offset
     });
     
     return NextResponse.json({
