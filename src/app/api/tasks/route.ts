@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import Task from '../../../models/Task';
 import dbConnect from '../../../lib/dbConnect';
-import { validateRequest } from '../../../middleware/validation';
+import { validateRequest } from '../../../../middleware/validation';
 
 export async function POST(request: Request) {
   // Validate input
