@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import Task from '../../../models/Task';
 import dbConnect from '../../../lib/dbConnect';
-import { validateRequest } from '../../middleware/validation';
+import { validateRequest } from '../../../middleware/validation';
 
 export async function POST(request: Request) {
   // Validate input
@@ -42,7 +42,8 @@ export async function GET(request: Request) {
   // Validate query parameters
   const validation = validateRequest([
     { param: 'limit', type: 'query', required: false, min: 1 },
-    { param: 'offset', type: 'query', required: false, min: 0 }
+    { param: 'offset', type: 'query', required: false, min: 0 },
+    { param: 'priority', type: 'query', required: false, enum: ['low', 'medium', 'high'] }
   ]);
 
   const validationResult = await validation(request);
@@ -55,15 +56,20 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
+    const priority = searchParams.get('priority');
     
     const tasks = await Task.findAll({
       limit,
-      offset
+      offset,
+      priority
     });
     
     return NextResponse.json({
       total: tasks.count,
-      tasks: tasks.rows
+      tasks: tasks.rows,
+      filters: {
+        priority: priority || 'all'
+      }
     });
   } catch (error) {
     console.error('Error fetching tasks:', error);
