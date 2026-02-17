@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
-import Task from '@/models/Task';
-import dbConnect from '@/lib/dbConnect';
+// Adjust the import path to match your actual Task model location
+import Task from '../../../models/Task';
+import dbConnect from '../../../lib/dbConnect';
 
 export async function POST(request: Request) {
   try {
@@ -32,10 +33,28 @@ export async function POST(request: Request) {
   }
 }
 
-// Placeholder for GET
-export async function GET() {
-  return NextResponse.json(
-    { error: 'Not implemented yet' },
-    { status: 501 }
-  );
+export async function GET(request: Request) {
+  try {
+    await dbConnect();
+    const { searchParams } = new URL(request.url);
+    const limit = parseInt(searchParams.get('limit') || '10');
+    const offset = parseInt(searchParams.get('offset') || '0');
+    
+    const tasks = await Task.findAndCountAll({
+      limit,
+      offset,
+      order: [['createdAt', 'DESC']]
+    });
+    
+    return NextResponse.json({
+      total: tasks.count,
+      tasks: tasks.rows
+    });
+  } catch (error) {
+    console.error('Error fetching tasks:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch tasks' },
+      { status: 500 }
+    );
+  }
 }
