@@ -1,27 +1,37 @@
 import { NextResponse } from 'next/server';
 import Task from '../../../../../models/Task';
-import dbConnect from '../../../../../lib/dbConnect';
-import { validateRequest } from '../../../../../middleware/validation';
 
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  // Validate input
-  const validation = validateRequest([
-    { param: 'status', type: 'body', required: true, enum: ['pending', 'completed'] }
-  ]);
-
-  const validationResult = await validation(request);
-  if (validationResult) {
-    return validationResult;
-  }
-
   try {
-    await dbConnect();
     const { id } = await params;
     const body = await request.json();
     const { status } = body;
+    
+    // Manual validation
+    const errors = [];
+    
+    if (!status) {
+      errors.push({
+        msg: 'status is required',
+        param: 'status',
+        location: 'body'
+      });
+    }
+    
+    if (status && !['pending', 'completed'].includes(status)) {
+      errors.push({
+        msg: 'status must be one of: pending, completed',
+        param: 'status',
+        location: 'body'
+      });
+    }
+    
+    if (errors.length > 0) {
+      return NextResponse.json({ errors }, { status: 400 });
+    }
     
     const task = await Task.findByPk(id);
     

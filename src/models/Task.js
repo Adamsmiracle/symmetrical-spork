@@ -21,6 +21,11 @@ class TaskModel {
   static async findAll(options = {}) {
     let filteredTasks = [...tasks];
     
+    // Apply priority filter
+    if (options.priority) {
+      filteredTasks = filteredTasks.filter(task => task.priority === options.priority);
+    }
+    
     // Sort by creation date (newest first)
     filteredTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     
@@ -33,7 +38,7 @@ class TaskModel {
 
     return {
       rows: filteredTasks,
-      count: tasks.length
+      count: tasks.length // Return total count before filtering
     };
   }
 
@@ -42,10 +47,24 @@ class TaskModel {
     return task ? new TaskModel(task) : null;
   }
 
+  static async destroy(id) {
+    const index = tasks.findIndex(t => t.id === id);
+    if (index !== -1) {
+      tasks.splice(index, 1);
+      return true;
+    }
+    return false;
+  }
+
   static async create(taskData) {
     const newTask = new TaskModel(taskData);
     tasks.push(newTask);
     return newTask;
+  }
+
+  static reset() {
+    tasks = [];
+    nextId = 1;
   }
 
   async save() {

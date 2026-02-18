@@ -284,6 +284,58 @@ textarea.input {
   font-weight: 500;
 }
 
+.deleteButton {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  opacity: 0.6;
+}
+
+.deleteButton:hover {
+  opacity: 1;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.deleteButton:active {
+  transform: scale(0.95);
+}
+
+.filterControls {
+  margin-bottom: 1.5rem;
+}
+
+.filterControls label {
+  display: block;
+  font-weight: 600;
+  color: var(--fg);
+  margin-bottom: 0.5rem;
+  font-size: 14px;
+}
+
+.filterSelect {
+  width: 100%;
+  max-width: 200px;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  background: var(--bg);
+  color: var(--fg);
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
 .empty-state {
   text-align: center;
   padding: 3rem 1rem;

@@ -3,8 +3,7 @@ const TaskModel = require('../src/models/Task');
 describe('TaskModel', () => {
   beforeEach(() => {
     // Clear in-memory tasks before each test
-    TaskModel.tasks = [];
-    TaskModel.nextId = 1;
+    TaskModel.reset();
   });
 
   describe('Constructor', () => {
@@ -68,8 +67,11 @@ describe('TaskModel', () => {
     });
 
     test('should apply pagination correctly', async () => {
+      // Create tasks with slight delays to ensure different timestamps
       for (let i = 1; i <= 5; i++) {
         await TaskModel.create({ title: `Task ${i}` });
+        // Add small delay to ensure different creation times
+        await new Promise(resolve => setTimeout(resolve, 1));
       }
       
       const result = await TaskModel.findAll({ limit: 2, offset: 1 });

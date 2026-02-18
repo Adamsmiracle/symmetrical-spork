@@ -1,5 +1,15 @@
 const { createMocks } = require('node-mocks-http');
-const handler = require('../../src/app/api/tasks/route');
+
+// Mock NextResponse before importing the handler
+jest.mock('next/server', () => ({
+  NextResponse: {
+    json: jest.fn((data, init = {}) => ({
+      status: init.status || 200,
+      json: async () => data,
+      headers: new Map()
+    }))
+  }
+}));
 
 // Mock the Task model
 jest.mock('../../src/models/Task', () => ({
@@ -9,6 +19,9 @@ jest.mock('../../src/models/Task', () => ({
 
 // Mock dbConnect
 jest.mock('../../src/lib/dbConnect', () => jest.fn().mockResolvedValue());
+
+const { NextResponse } = require('next/server');
+const handler = require('../../src/app/api/tasks/route');
 
 const Task = require('../../src/models/Task');
 
@@ -29,10 +42,10 @@ describe('/api/tasks', () => {
       
       Task.findAll.mockResolvedValue(mockTasks);
 
-      const { req } = createMocks({
+      const req = {
         method: 'GET',
-        url: '/api/tasks?limit=10&offset=0'
-      });
+        url: 'http://localhost:3000/api/tasks?limit=10&offset=0'
+      };
 
       const response = await handler.GET(req);
       const data = await response.json();
@@ -43,7 +56,10 @@ describe('/api/tasks', () => {
       });
       expect(data).toEqual({
         total: 2,
-        tasks: mockTasks.rows
+        tasks: mockTasks.rows,
+        filters: {
+          priority: 'all'
+        }
       });
       expect(response.status).toBe(200);
     });
@@ -51,10 +67,10 @@ describe('/api/tasks', () => {
     test('should use default pagination values', async () => {
       Task.findAll.mockResolvedValue({ rows: [], count: 0 });
 
-      const { req } = createMocks({
+      const req = {
         method: 'GET',
-        url: '/api/tasks'
-      });
+        url: 'http://localhost:3000/api/tasks'
+      };
 
       const response = await handler.GET(req);
 
@@ -67,10 +83,10 @@ describe('/api/tasks', () => {
     test('should handle errors', async () => {
       Task.findAll.mockRejectedValue(new Error('Database error'));
 
-      const { req } = createMocks({
+      const req = {
         method: 'GET',
-        url: '/api/tasks'
-      });
+        url: 'http://localhost:3000/api/tasks'
+      };
 
       const response = await handler.GET(req);
       const data = await response.json();
@@ -98,13 +114,10 @@ describe('/api/tasks', () => {
         priority: 'high'
       };
 
-      const { req } = createMocks({
+      const req = {
         method: 'POST',
-        body: requestBody,
-        headers: {
-          'content-type': 'application/json'
-        }
-      });
+        json: async () => requestBody
+      };
 
       const response = await handler.POST(req);
       const data = await response.json();
@@ -119,32 +132,33 @@ describe('/api/tasks', () => {
         description: 'No title task'
       };
 
-      const { req } = createMocks({
+      const req = {
         method: 'POST',
-        body: requestBody,
-        headers: {
-          'content-type': 'application/json'
-        }
-      });
+        json: async () => requestBody
+      };
 
       const response = await handler.POST(req);
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe('Title is required');
+      expect(data.errors).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            msg: 'title is required',
+            param: 'title'
+          })
+        ])
+      );
       expect(Task.create).not.toHaveBeenCalled();
     });
 
     test('should handle create errors', async () => {
       Task.create.mockRejectedValue(new Error('Create failed'));
 
-      const { req } = createMocks({
+      const req = {
         method: 'POST',
-        body: { title: 'Test Task' },
-        headers: {
-          'content-type': 'application/json'
-        }
-      });
+        json: async () => ({ title: 'Test Task' })
+      };
 
       const response = await handler.POST(req);
       const data = await response.json();

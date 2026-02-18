@@ -1,25 +1,33 @@
 import { NextResponse } from 'next/server';
 import Task from '../../../models/Task';
-import dbConnect from '../../../lib/dbConnect';
-import { validateRequest } from '../../../../middleware/validation';
 
 export async function POST(request: Request) {
-  // Validate input
-  const validation = validateRequest([
-    { param: 'title', type: 'body', required: true },
-    { param: 'description', type: 'body', required: false },
-    { param: 'priority', type: 'body', required: false, enum: ['low', 'medium', 'high'] }
-  ]);
-
-  const validationResult = await validation(request);
-  if (validationResult) {
-    return validationResult;
-  }
-
   try {
-    await dbConnect();
     const body = await request.json();
     const { title, description, dueDate, priority } = body;
+    
+    // Manual validation
+    const errors = [];
+    
+    if (!title || title.trim() === '') {
+      errors.push({
+        msg: 'title is required',
+        param: 'title',
+        location: 'body'
+      });
+    }
+    
+    if (priority && !['low', 'medium', 'high'].includes(priority)) {
+      errors.push({
+        msg: 'priority must be one of: low, medium, high',
+        param: 'priority',
+        location: 'body'
+      });
+    }
+    
+    if (errors.length > 0) {
+      return NextResponse.json({ errors }, { status: 400 });
+    }
     
     const task = await Task.create({
       title: title.trim(),
@@ -39,24 +47,42 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
-  // Validate query parameters
-  const validation = validateRequest([
-    { param: 'limit', type: 'query', required: false, min: 1 },
-    { param: 'offset', type: 'query', required: false, min: 0 },
-    { param: 'priority', type: 'query', required: false, enum: ['low', 'medium', 'high'] }
-  ]);
-
-  const validationResult = await validation(request);
-  if (validationResult) {
-    return validationResult;
-  }
-
   try {
-    await dbConnect();
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '10');
     const offset = parseInt(searchParams.get('offset') || '0');
     const priority = searchParams.get('priority');
+    
+    // Manual validation
+    const errors = [];
+    
+    if (limit < 1) {
+      errors.push({
+        msg: 'limit must be at least 1',
+        param: 'limit',
+        location: 'query'
+      });
+    }
+    
+    if (offset < 0) {
+      errors.push({
+        msg: 'offset must be at least 0',
+        param: 'offset',
+        location: 'query'
+      });
+    }
+    
+    if (priority && !['low', 'medium', 'high'].includes(priority)) {
+      errors.push({
+        msg: 'priority must be one of: low, medium, high',
+        param: 'priority',
+        location: 'query'
+      });
+    }
+    
+    if (errors.length > 0) {
+      return NextResponse.json({ errors }, { status: 400 });
+    }
     
     const tasks = await Task.findAll({
       limit,
