@@ -140,10 +140,10 @@ A lightweight personal task management API built with Next.js that helps individ
 | **Sprint** | Sprint 2 |
 
 **Acceptance Criteria:**
-- [x] GET /api/health endpoint
-- [x] Database connection check
-- [x] Structured logging
-- [x] Request logging middleware
+-  GET /api/health endpoint
+-  Database connection check
+-  Structured logging
+-  Request logging middleware
 
 ---
 
@@ -151,11 +151,11 @@ A lightweight personal task management API built with Next.js that helps individ
 
 | ID | Story | Priority | Estimate | Status |
 |----|-------|----------|----------|--------|
-| US-01 | Create task | High | 3 | ✅ Done |
-| US-02 | View tasks | High | 2 | ✅ Done |
-| US-03 | Update status | Medium | 2 | ✅ Done |
-| US-04 | Filter by priority | Medium | 3 | ✅ Done |
-| US-05 | Delete task | Low | 1 | ✅ Done |
+| US-01 | Create task | High | 3 | Done |
+| US-02 | View tasks | High | 2 | Done |
+| US-03 | Update status | Medium | 2 | Done |
+| US-04 | Filter by priority | Medium | 3 | Done |
+| US-05 | Delete task | Low | 1 | Done |
 
 **Total Story Points:** 11  
 **Completed:** 5/5 stories (100%)
