@@ -100,6 +100,22 @@ GET    /api/docs               - API documentation
 
 ---
 
+## Project Screenshots
+
+### 📊 Test Results
+![Test Results Passing](./screenshots/test_results_pass.png)
+*All tests passing with high coverage*
+
+### 🔄 Pipeline Status  
+![Pipeline](./screenshots/pipeline.png)
+*CI/CD pipeline running successfully*
+
+### 📝 Git History
+![Git Commits](./screenshots/git_commits.png)
+*Clean commit history with conventional messages*
+
+---
+
 ## Getting Started
 
 ### Prerequisites
